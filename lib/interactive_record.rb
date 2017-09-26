@@ -1,5 +1,6 @@
 require_relative "../config/environment.rb"
 require 'active_support/inflector'
+require 'pry'
 
 class InteractiveRecord
 
@@ -22,17 +23,29 @@ class InteractiveRecord
     DB[:conn].execute(sql)
   end
 
-  def self.find_by(id: 0, name: '', grade: 0)
-    if id != 0
-      sql = "SELECT * FROM #{self.table_name} WHERE id = #{id}"
-      DB[:conn].execute(sql)
-    elsif name != ''
-      sql = "SELECT * FROM #{self.table_name} WHERE name = '#{name}'"
-      DB[:conn].execute(sql)
-    elsif grade != 0
-      sql = "SELECT * FROM #{self.table_name} WHERE grade = #{grade}"
-      DB[:conn].execute(sql)
+  # def self.find_by(hash)
+  #   sql = hash.map do |key, value|
+  #     if value.to_i == value
+  #       "SELECT * FROM #{self.table_name} WHERE #{key} = #{value}"
+  #     else
+  #       "SELECT * FROM #{self.table_name} WHERE #{key} = '#{value}'"
+  #     end
+  #   end
+  #   DB[:conn].execute(sql[0])
+  # end
+
+  def self.find_by(hash)
+    sql = "SELECT * FROM #{self.table_name} WHERE"
+    hash.each do |key, value|
+      # binding.pry
+      sql += " AND" if sql.slice(-5..-1) != "WHERE"
+      if value.to_i == value
+        sql += " #{key} = #{value}"
+      else
+        sql +=" #{key} = '#{value}'"
+      end
     end
+    DB[:conn].execute(sql)
   end
 
   def initialize(options = {})
